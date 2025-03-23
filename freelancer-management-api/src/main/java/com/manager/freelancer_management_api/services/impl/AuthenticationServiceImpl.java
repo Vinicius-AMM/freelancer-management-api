@@ -1,0 +1,77 @@
+package com.manager.freelancer_management_api.services.impl;
+
+import com.manager.freelancer_management_api.domain.repositories.UserRepository;
+import com.manager.freelancer_management_api.domain.user.dtos.LoginDTO;
+import com.manager.freelancer_management_api.domain.user.dtos.LoginResponseDTO;
+import com.manager.freelancer_management_api.domain.user.dtos.RegisterUserDTO;
+import com.manager.freelancer_management_api.domain.user.entities.User;
+import com.manager.freelancer_management_api.domain.user.enums.UserRole;
+import com.manager.freelancer_management_api.domain.user.exceptions.EmailAlreadyExistsException;
+import com.manager.freelancer_management_api.infra.security.TokenService;
+import com.manager.freelancer_management_api.services.AuthenticationService;
+import com.manager.freelancer_management_api.utils.PasswordValidator;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+
+@Service
+public class AuthenticationServiceImpl implements AuthenticationService {
+
+    private final UserRepository userRepository;
+    private final PasswordValidator passwordValidator;
+    private final TokenService tokenService;
+    private final PasswordEncoder passwordEncoder;
+
+    @Autowired
+    public AuthenticationServiceImpl(UserRepository userRepository, PasswordValidator passwordValidator, TokenService tokenService, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordValidator = passwordValidator;
+        this.tokenService = tokenService;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @Override
+    public LoginResponseDTO login(LoginDTO login){
+        var user = userRepository.findByEmail(login.email());
+
+        isLoginValid(login);
+        String token = tokenService.generateToken(login);
+        return new LoginResponseDTO(token);
+    }
+
+    @Override
+    @Transactional
+    public void register(RegisterUserDTO registerData){
+        if(userRepository.existsByEmail(registerData.email())){
+            throw new EmailAlreadyExistsException();
+        }
+        String encryptedPassword = passwordEncoder.encode(registerData.password());
+        User user = User.builder()
+                .fullName(registerData.fullName())
+                .document(registerData.document())
+                .email(registerData.email())
+                .password(encryptedPassword)
+                .mainUserRole(registerData.mainUserRole())
+                .currentUserRole(registerData.currentUserRole())
+                .build();
+        userRepository.save(user);
+    }
+
+    @Override
+    public void isLoginValid(LoginDTO login){
+        var user = userRepository.findByEmail(login.email());
+
+        if(user == null){
+            throw new BadCredentialsException("Email or password is wrong.");
+        }
+
+        try {
+            passwordValidator.validate(login.password(), user.getPassword());
+        } catch (BadCredentialsException e){
+            throw new BadCredentialsException("Email or password is wrong.");
+        }
+    }
+}

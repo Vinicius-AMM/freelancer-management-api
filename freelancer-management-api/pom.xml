@@ -12,7 +12,7 @@
 	<artifactId>freelancer-management-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>freelancer-management-api</name>
-	<description>Demo project for Spring Boot</description>
+	<description>Freelancer Management API</description>
 	<url/>
 	<licenses>
 		<license/>

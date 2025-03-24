@@ -3,9 +3,7 @@ package com.manager.freelancer_management_api.services.impl;
 import com.manager.freelancer_management_api.domain.repositories.UserRepository;
 import com.manager.freelancer_management_api.domain.user.entities.User;
 import com.manager.freelancer_management_api.domain.user.enums.UserRole;
-import com.manager.freelancer_management_api.domain.user.exceptions.DocumentAlreadyExistsException;
-import com.manager.freelancer_management_api.domain.user.exceptions.EmailAlreadyExistsException;
-import com.manager.freelancer_management_api.domain.user.exceptions.UserNotFoundException;
+import com.manager.freelancer_management_api.domain.user.exceptions.*;
 import com.manager.freelancer_management_api.utils.IsCurrentUserValid;
 import com.manager.freelancer_management_api.utils.PasswordValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,8 +19,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
@@ -55,6 +52,8 @@ class UserServiceImplTest {
                 .mainUserRole(UserRole.CLIENT)
                 .currentUserRole(UserRole.FREELANCER)
                 .build();
+
+        doNothing().when(isCurrentUserValid).validateAccess(testUser.getId());
     }
     private void mockUserExists() {
         when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
@@ -124,13 +123,34 @@ class UserServiceImplTest {
         assertThrows(DocumentAlreadyExistsException.class, () -> userService.updateDocument(testUser.getId(), "password", "1111111111111"));
     }
 
+    @Test
+    void testUpdatePassword_ValidInput_Success() {
+        mockUserExists();
 
+        String oldPassword = "oldPassword";
+        String newPassword = "newPassword";
+        String encodedNewPassword = "encodeNewPassword";
 
+        doNothing().when(passwordValidator).validate(oldPassword, testUser.getPassword());
+        when(passwordEncoder.encode(newPassword)).thenReturn((encodedNewPassword));
 
+        userService.updatePassword(testUser.getId(), oldPassword, newPassword);
 
+        assertEquals(encodedNewPassword, testUser.getPassword());
 
+        verify(userRepository).save(testUser);
+    }
+    @Test
+    void testUpdatePassword_PasswordIsSameAsOld_ThrowsSamePasswordException(){
+        mockUserExists();
 
+        String oldPassword = "oldPassword";
+        String newPassword = "oldPassword";
 
+        doNothing().when(passwordValidator).validate(oldPassword, testUser.getPassword());
+
+        assertThrows(SamePasswordException.class, () -> userService.updatePassword(testUser.getId(), oldPassword, newPassword));
+    }
 
 
 

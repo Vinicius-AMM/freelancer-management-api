@@ -152,12 +152,27 @@ class UserServiceImplTest {
         assertThrows(SamePasswordException.class, () -> userService.updatePassword(testUser.getId(), oldPassword, newPassword));
     }
 
+    @Test
+    void testChangeUserRole_ValidInput_Success(){
+        mockUserExists();
 
+        String newUserRole = "client";
 
+        userService.changeUserRole(testUser.getId(), newUserRole);
 
+        assertEquals(UserRole.CLIENT, testUser.getCurrentUserRole());
 
+        verify(userRepository).save(testUser);
+    }
 
+    @Test
+    void testChangeUserRole_InvalidUserRole_ThrowsInvalidUserRoleException() {
+        mockUserExists();
 
+        String newUserRole = "invalid";
+
+        assertThrows(InvalidUserRoleException.class, () -> userService.changeUserRole(testUser.getId(), newUserRole));
+    }
 
 
 }

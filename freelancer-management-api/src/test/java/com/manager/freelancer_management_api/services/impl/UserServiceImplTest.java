@@ -174,5 +174,12 @@ class UserServiceImplTest {
         assertThrows(InvalidUserRoleException.class, () -> userService.changeUserRole(testUser.getId(), newUserRole));
     }
 
+    @Test
+    void testDeleteById_ValidInput_Success(){
+        mockUserExists();
 
+        userService.deleteById(testUser.getId(), "password");
+
+        verify(userRepository).deleteById(testUser.getId());
+    }
 }

@@ -35,9 +35,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public LoginResponseDTO login(LoginDTO login){
-        var user = userRepository.findByEmail(login.email());
-
         isLoginValid(login);
+
         String token = tokenService.generateToken(login);
         return new LoginResponseDTO(token);
     }

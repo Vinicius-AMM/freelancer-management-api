@@ -79,9 +79,7 @@ class AuthenticationServiceImplTest {
     void testLogin_InvalidCredentials_ThrowsBadCredentialsException() {
         when(userRepository.findByEmail(invalidLoginDTO.email())).thenReturn(null);
 
-        BadCredentialsException e = assertThrows(BadCredentialsException.class, () -> {
-            authenticationService.login(invalidLoginDTO);
-        });
+        BadCredentialsException e = assertThrows(BadCredentialsException.class, () -> authenticationService.login(invalidLoginDTO));
 
         assertEquals("Email or password is wrong.", e.getMessage());
         verify(userRepository).findByEmail(invalidLoginDTO.email());
@@ -102,9 +100,7 @@ class AuthenticationServiceImplTest {
     void testRegister_InvalidRegistrationData_EmailAlreadyExists_ThrowsEmailAlreadyExistsException() {
         when(userRepository.existsByEmail(validRegisterUserDTO.email())).thenReturn(true);
 
-        EmailAlreadyExistsException e = assertThrows(EmailAlreadyExistsException.class, () -> {
-            authenticationService.register(validRegisterUserDTO);
-        });
+        EmailAlreadyExistsException e = assertThrows(EmailAlreadyExistsException.class, () -> authenticationService.register(validRegisterUserDTO));
 
         assertEquals("Email already exists.", e.getMessage());
         verify(userRepository).existsByEmail(validRegisterUserDTO.email());
@@ -116,18 +112,14 @@ class AuthenticationServiceImplTest {
         doNothing().when(passwordValidator)
                 .validate(validLoginDTO.password(), testUser.getPassword());
 
-        assertDoesNotThrow(() -> {
-            authenticationService.isLoginValid(validLoginDTO);
-        });
+        assertDoesNotThrow(() -> authenticationService.isLoginValid(validLoginDTO));
     }
 
     @Test
     void testIsLoginValid_InvalidEmail_ThrowsBadCredentialsException() {
         when(userRepository.findByEmail(invalidLoginDTO.email())).thenReturn(null);
 
-        BadCredentialsException e = assertThrows(BadCredentialsException.class, () -> {
-            authenticationService.isLoginValid(invalidLoginDTO);
-        });
+        BadCredentialsException e = assertThrows(BadCredentialsException.class, () -> authenticationService.isLoginValid(invalidLoginDTO));
 
         assertEquals("Email or password is wrong.", e.getMessage());
         verify(userRepository).findByEmail(invalidLoginDTO.email());
@@ -139,9 +131,7 @@ class AuthenticationServiceImplTest {
         doThrow(new BadCredentialsException("Invalid password.")).when(passwordValidator)
                 .validate(invalidLoginDTO.password(), testUser.getPassword());
 
-        BadCredentialsException e = assertThrows(BadCredentialsException.class, () -> {
-            authenticationService.isLoginValid(invalidLoginDTO);
-        });
+        BadCredentialsException e = assertThrows(BadCredentialsException.class, () -> authenticationService.isLoginValid(invalidLoginDTO));
 
         assertEquals("Email or password is wrong.", e.getMessage());
         verify(passwordValidator).validate(anyString(), anyString());

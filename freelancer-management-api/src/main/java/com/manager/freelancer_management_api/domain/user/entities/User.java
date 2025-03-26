@@ -1,6 +1,5 @@
 package com.manager.freelancer_management_api.domain.user.entities;
 
-import com.manager.freelancer_management_api.domain.user.dtos.LoginDTO;
 import com.manager.freelancer_management_api.domain.user.enums.UserRole;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -9,7 +8,6 @@ import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Collection;
 import java.util.List;
@@ -38,7 +36,7 @@ public class User implements UserDetails{
     @Email(message = "Invalid E-mail")
     private String email;
 
-    @Column(name ="password")
+    @Column(name ="password", nullable = false)
     private String password;
 
     @Column(name ="main_role")

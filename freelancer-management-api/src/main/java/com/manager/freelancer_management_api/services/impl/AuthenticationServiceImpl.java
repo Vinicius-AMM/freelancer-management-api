@@ -5,14 +5,13 @@ import com.manager.freelancer_management_api.domain.user.dtos.LoginDTO;
 import com.manager.freelancer_management_api.domain.user.dtos.LoginResponseDTO;
 import com.manager.freelancer_management_api.domain.user.dtos.RegisterUserDTO;
 import com.manager.freelancer_management_api.domain.user.entities.User;
-import com.manager.freelancer_management_api.domain.user.enums.UserRole;
 import com.manager.freelancer_management_api.domain.user.exceptions.EmailAlreadyExistsException;
+import com.manager.freelancer_management_api.domain.user.exceptions.InvalidEmailException;
 import com.manager.freelancer_management_api.infra.security.TokenService;
 import com.manager.freelancer_management_api.services.AuthenticationService;
 import com.manager.freelancer_management_api.utils.PasswordValidator;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -34,8 +33,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public LoginResponseDTO login(LoginDTO login){
-        isLoginValid(login);
+    public LoginResponseDTO login(LoginDTO login) {
+        var user = userRepository.findByEmail(login.email());
+
+        if(user == null){
+            throw new InvalidEmailException("Invalid email address.");
+        }
+
+        passwordValidator.validate(login.password(), user.getPassword());
 
         String token = tokenService.generateToken(login);
         return new LoginResponseDTO(token);
@@ -57,20 +62,5 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .currentUserRole(registerData.currentUserRole())
                 .build();
         userRepository.save(user);
-    }
-
-    @Override
-    public void isLoginValid(LoginDTO login){
-        var user = userRepository.findByEmail(login.email());
-
-        if(user == null){
-            throw new BadCredentialsException("Email or password is wrong.");
-        }
-
-        try {
-            passwordValidator.validate(login.password(), user.getPassword());
-        } catch (BadCredentialsException e){
-            throw new BadCredentialsException("Email or password is wrong.");
-        }
     }
 }

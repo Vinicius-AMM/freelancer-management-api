@@ -29,10 +29,7 @@ public class KeyConfig {
         try{
             String publicKeyContent = new String(publicKeyResource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
 
-            String publicKeyPEM = publicKeyContent
-                    .replace("-----BEGIN PUBLIC KEY-----", "")
-                    .replace("-----END PUBLIC KEY-----", "")
-                    .replaceAll("\\s", "");
+            String publicKeyPEM = cleanKey(publicKeyContent, "PUBLIC");
 
             byte[] decodedKey = Base64.getDecoder().decode(publicKeyPEM);
             X509EncodedKeySpec spec = new X509EncodedKeySpec(decodedKey);
@@ -47,10 +44,7 @@ public class KeyConfig {
         try{
             String privateKeyContent = new String(privateKeyResource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
 
-            String privateKeyPEM = privateKeyContent
-                    .replace("-----BEGIN PRIVATE KEY-----", "")
-                    .replace("-----END PRIVATE KEY-----", "")
-                    .replaceAll("\\s", "");
+            String privateKeyPEM = cleanKey(privateKeyContent, "PRIVATE");
 
             byte[] decodedKey = Base64.getDecoder().decode(privateKeyPEM);
             PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(decodedKey);
@@ -61,4 +55,10 @@ public class KeyConfig {
         }
     }
 
+    private String cleanKey(String keyContent, String keyType) {
+        return keyContent
+               .replace("-----BEGIN " + keyType + " KEY-----", "")
+               .replace("-----END " + keyType + " KEY-----", "")
+               .replaceAll("\\s", "");
+    }
 }

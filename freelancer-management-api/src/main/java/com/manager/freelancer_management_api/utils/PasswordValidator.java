@@ -1,7 +1,7 @@
 package com.manager.freelancer_management_api.utils;
 
+import com.manager.freelancer_management_api.domain.user.exceptions.InvalidPasswordException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +17,7 @@ public class PasswordValidator {
 
     public void validate(String rawPassword, String encodedPassword){
         if(!passwordEncoder.matches(rawPassword, encodedPassword)){
-            throw new BadCredentialsException("Invalid password.");
+            throw new InvalidPasswordException("Invalid password.");
         }
     }
 }

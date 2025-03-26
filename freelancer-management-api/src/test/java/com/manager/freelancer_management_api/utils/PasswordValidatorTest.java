@@ -1,5 +1,6 @@
 package com.manager.freelancer_management_api.utils;
 
+import com.manager.freelancer_management_api.domain.user.exceptions.InvalidPasswordException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,7 +22,7 @@ class PasswordValidatorTest {
     private PasswordValidator passwordValidator;
 
     @Test
-    void validatePassword_validPassword () {
+    void testValidatePassword_validPassword () {
         String rawPassword = "testpassword";
         String encodedPassword = "$2a$10$6QWxbg21ndMh/fOtu6tpVOw42Fd0kTYshCZF0RuKrmgL7.6YTbQQS";
 
@@ -32,7 +33,7 @@ class PasswordValidatorTest {
     }
 
     @Test
-    void validatePassword_invalidPassword_ThrowsBadCredentialsException() {
+    void testValidatePassword_invalidPassword_ThrowsBadCredentialsException() {
         String rawPassword = "testpassword";
         String encodedPassword = "$2a$10$6QWxbg21ndMh/fOtu6tpVOw42Fd0kTYshCZF0RuKrmgL7.6YTbQQS";
 

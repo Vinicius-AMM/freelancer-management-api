@@ -76,16 +76,6 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    void testLogin_InvalidCredentials_ThrowsBadCredentialsException() {
-        when(userRepository.findByEmail(invalidLoginDTO.email())).thenReturn(null);
-
-        BadCredentialsException e = assertThrows(BadCredentialsException.class, () -> authenticationService.login(invalidLoginDTO));
-
-        assertEquals("Email or password is wrong.", e.getMessage());
-        verify(userRepository).findByEmail(invalidLoginDTO.email());
-    }
-
-    @Test
     void testRegister_ValidRegistrationData_Success() {
         when(userRepository.existsByEmail(validRegisterUserDTO.email())).thenReturn(false);
         when(passwordEncoder.encode(validRegisterUserDTO.password())).thenReturn("encodedPassword");

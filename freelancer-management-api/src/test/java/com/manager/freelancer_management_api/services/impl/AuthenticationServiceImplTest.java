@@ -7,6 +7,8 @@ import com.manager.freelancer_management_api.domain.user.dtos.RegisterUserDTO;
 import com.manager.freelancer_management_api.domain.user.entities.User;
 import com.manager.freelancer_management_api.domain.user.enums.UserRole;
 import com.manager.freelancer_management_api.domain.user.exceptions.EmailAlreadyExistsException;
+import com.manager.freelancer_management_api.domain.user.exceptions.InvalidEmailException;
+import com.manager.freelancer_management_api.domain.user.exceptions.InvalidPasswordException;
 import com.manager.freelancer_management_api.infra.security.TokenService;
 import com.manager.freelancer_management_api.utils.PasswordValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +18,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -97,33 +98,33 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    void testIsLoginValid_ValidCredentials() {
+    void testLogin_ValidCredentials() {
         when(userRepository.findByEmail(validLoginDTO.email())).thenReturn(testUser);
         doNothing().when(passwordValidator)
                 .validate(validLoginDTO.password(), testUser.getPassword());
 
-        assertDoesNotThrow(() -> authenticationService.isLoginValid(validLoginDTO));
+        assertDoesNotThrow(() -> authenticationService.login(validLoginDTO));
     }
 
     @Test
-    void testIsLoginValid_InvalidEmail_ThrowsBadCredentialsException() {
+    void testLogin_InvalidEmail_ThrowsInvalidEmailException() {
         when(userRepository.findByEmail(invalidLoginDTO.email())).thenReturn(null);
 
-        BadCredentialsException e = assertThrows(BadCredentialsException.class, () -> authenticationService.isLoginValid(invalidLoginDTO));
+        InvalidEmailException e = assertThrows(InvalidEmailException.class, () -> authenticationService.login(invalidLoginDTO));
 
-        assertEquals("Email or password is wrong.", e.getMessage());
+        assertEquals("Invalid email address.", e.getMessage());
         verify(userRepository).findByEmail(invalidLoginDTO.email());
     }
 
     @Test
-    void testIsLoginValid_InvalidPassword_ThrowsBadCredentialsException() {
+    void testLogin_InvalidPassword_ThrowsInvalidPasswordException() {
         when(userRepository.findByEmail(invalidLoginDTO.email())).thenReturn(testUser);
-        doThrow(new BadCredentialsException("Invalid password.")).when(passwordValidator)
+        doThrow(new InvalidPasswordException("Invalid password.")).when(passwordValidator)
                 .validate(invalidLoginDTO.password(), testUser.getPassword());
 
-        BadCredentialsException e = assertThrows(BadCredentialsException.class, () -> authenticationService.isLoginValid(invalidLoginDTO));
+        InvalidPasswordException e = assertThrows(InvalidPasswordException.class, () -> authenticationService.login(invalidLoginDTO));
 
-        assertEquals("Email or password is wrong.", e.getMessage());
+        assertEquals("Invalid password.", e.getMessage());
         verify(passwordValidator).validate(anyString(), anyString());
         verify(userRepository).findByEmail(invalidLoginDTO.email());
     }

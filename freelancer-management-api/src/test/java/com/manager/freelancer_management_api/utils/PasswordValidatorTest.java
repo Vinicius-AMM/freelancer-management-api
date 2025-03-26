@@ -6,7 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -38,7 +37,7 @@ class PasswordValidatorTest {
         String encodedPassword = "$2a$10$6QWxbg21ndMh/fOtu6tpVOw42Fd0kTYshCZF0RuKrmgL7.6YTbQQS";
 
         when(passwordEncoder.matches(rawPassword, encodedPassword)).thenReturn(false);
-        assertThrows(BadCredentialsException.class, () -> passwordValidator.validate(rawPassword, encodedPassword));
+        assertThrows(InvalidPasswordException.class, () -> passwordValidator.validate(rawPassword, encodedPassword));
 
         verify(passwordEncoder).matches(rawPassword, encodedPassword);
     }
